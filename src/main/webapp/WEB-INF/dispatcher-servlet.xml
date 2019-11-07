@@ -8,7 +8,7 @@
 	http://www.springframework.org/schema/mvc
 	http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <context:component-scan base-package="com.mmall" annotation-config="true"/>
+    <context:component-scan base-package="com.mmall" annotation-config="true"></context:component-scan>
 
     <mvc:annotation-driven>
         <mvc:message-converters>
@@ -20,6 +20,7 @@
                     </list>
                 </property>
             </bean>
+            <!-- 这个配置文件是SpringMVC文件，下面设置了@ResponseBody返回的数据为JSON格式-->
             <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
                 <property name="supportedMediaTypes">
                     <list>

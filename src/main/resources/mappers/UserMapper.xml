@@ -15,6 +15,7 @@
       <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
     </constructor>
   </resultMap>
+  <!--下面设置Base_Column_List为user的固定几个字段-->
   <sql id="Base_Column_List" >
     id, username, password, email, phone, question, answer, role, create_time, update_time
   </sql>
@@ -105,6 +106,8 @@
       </if>
     </trim>
   </insert>
+
+  <!--传过来的user中，不等于null的变量才更新-->
   <update id="updateByPrimaryKeySelective" parameterType="com.mmall.pojo.User" >
     update mmall_user
     <set >
@@ -138,6 +141,8 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <!--传过来的user中，所有的变量都更新,无论变量是否为null-->
   <update id="updateByPrimaryKey" parameterType="com.mmall.pojo.User" >
     update mmall_user
     set username = #{username,jdbcType=VARCHAR},
@@ -151,4 +156,71 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <!--查询用户名是否存在-->
+  <select id="checkUsername" resultType="int" parameterType="string">
+    <!-- 计算有多少行符合条件-->
+    select count(1) from mmall_user where username = #{username}
+  </select>
+
+
+  <!--查询邮箱是否已存在-->
+  <select id="checkEmail" resultType="int" parameterType="string">
+    <!-- 计算有多少行符合条件-->
+    select count(1) from mmall_user where email = #{email}
+  </select>
+
+  <!--用户名和密码都正确查出user的所有信息-->
+  <!--返回值类型为user，使用上面用过的同样返回值为user的resultMap-->
+  <select id="selectLogin" resultMap="BaseResultMap" parameterType="map">
+    select
+--     Base_Column_List为上面设置的user固定字段
+    <include refid="Base_Column_List" />
+    from mmall_user
+    where username=#{username} and password=#{password}
+  </select>
+
+  <!--根据用户名查出密保问题-->
+  <select id="selectQuestionByUsername" resultType="string" parameterType="string">
+    select
+    question
+    from mmall_user
+    where username = #{username}
+  </select>
+
+  <!--校验问题答案是否正确-->
+  <!--多个参数，参数类型使用map-->
+  <select id="checkAnswer" resultType="int" parameterType="map">
+    select
+    count(1)
+    from mmall_user
+    where username = #{username}
+    and question = #{question}
+    and answer = #{answer}
+  </select>
+
+  <!--根据用户名重置密码-->
+  <update id="updatePasswordByUsername" parameterType="map">
+    update mmall_user
+    set password = #{passwordNew}, update_time = now()
+    where username = #{username}
+  </update>
+
+  <!--根据密码和用户id校验密码是否是该用户的-->
+  <select id="checkPassword" resultType="int" parameterType="map">
+    SELECT
+    count(1)
+    from mmall_user
+    where password = #{password}
+    and id = #{userId}
+  </select>
+
+  <!--查询其他用户是否已经占用了email-->
+  <select id="checkEmailByUserId" resultType="int" parameterType="map">
+    SELECT
+    count(1)
+    from mmall_user
+    where email = #{email}
+    and id != #{userId}
+  </select>
 </mapper>
